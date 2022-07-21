@@ -1,5 +1,23 @@
 <?php
-    require_once("fetch.php");
+    require_once("get.php");
+
+    $datastatement = $dbh->prepare($querryallcontinent);
+    $datastatement->execute();
+    $affselectcont = $datastatement->fetchAll();
+
+    $datastatement = $dbh->prepare($querryworldwide);
+    $datastatement->execute();
+    $dataglobale = $datastatement->fetchAll();
+
+
+    if (isset($_GET)) {
+        // Affichage des données par défaut
+
+        $idContinent = $_GET['selectorcontinent'];
+        $datastatement = $dbh->prepare($querrypercontinent);
+        $datastatement->execute();
+        $datamultiple = $datastatement->fetchAll();
+    }
 
 ?>
 
@@ -21,13 +39,19 @@
     <header class="container">
         <div class="row menu">
             <h1 class="text-center">Population Mondiale 2019</h1>
-            <form action="get.php" method="get" class="row menu d-flex align-items-end justify-content-center mb-5">
+            <form action="/" method="get" class="row menu d-flex align-items-end justify-content-center mb-5">
                 <div class='form-group formulaire w-25'>
                     <label for="selectorcontinent">Par continent</label>
-                    <select class="form-control" id="selectorcontinent" name="selectorcontinent" onchange="changeContinent();">
+                    <select class="form-control" id="selectorcontinent" name="selectorcontinent" onchange="this.form.submit()">
                         <option value="">Monde</option>
                         <?php foreach ($affselectcont as $cont) : ?>
-                            <?= "<option value=" . $cont['ContID'] . ">" .  $cont['ContName'] . "</option>" ?>
+                            <?php if($cont['ContID'] == $idContinent) : ?>
+                                
+                                <?= "<option selected value=" . $cont['ContID'] . ">" .  $cont['ContName'] . "</option>" ?>
+                            <?php else : ?>
+                                <?= "<option value=" . $cont['ContID'] . ">" .  $cont['ContName'] . "</option>" ?>
+                                <?php endif; ?>
+                            
                         <?php endforeach ?>
                     </select>
                 </div>
