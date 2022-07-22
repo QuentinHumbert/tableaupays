@@ -1,23 +1,40 @@
 <?php
-    require_once("get.php");
+require_once("connexion.php");
+require("querry.php");
 
-    $datastatement = $dbh->prepare($querryallcontinent);
+$datastatement = $dbh->prepare($querrydisplaycontinent);
+$datastatement->execute();
+$affselectcont = $datastatement->fetchAll();
+
+$datastatement = $dbh->prepare($querryworldwide);
+$datastatement->execute();
+$dataglobale = $datastatement->fetchAll();
+
+if (!isset($_GET['selectorcontinent']) || $_GET['selectorcontinent'] == '') {
+    $datastatement = $dbh->prepare($querrypercontinent);
     $datastatement->execute();
-    $affselectcont = $datastatement->fetchAll();
+    $datamultiple = $datastatement->fetchAll();
+} else if (isset($_GET['selectorcontinent'])){
+    $datastatement = $dbh->prepare($querrydisplayregion);
+    $datastatement->execute(["id"=>$_GET['selectorcontinent']]);
+    $affselectreg = $datastatement->fetchAll();
 
-    $datastatement = $dbh->prepare($querryworldwide);
-    $datastatement->execute();
-    $dataglobale = $datastatement->fetchAll();
+    $datastatement = $dbh->prepare($querryallregion);
+    $datastatement->execute(["id"=>$_GET['selectorcontinent']]);
+    $datamultiple = $datastatement->fetchAll();
 
-
-    if (isset($_GET)) {
-        // Affichage des données par défaut
-
-        $idContinent = $_GET['selectorcontinent'];
-        $datastatement = $dbh->prepare($querrypercontinent);
-        $datastatement->execute();
+    if ($_GET['selectorcontinent'] == 3){
+        $datastatement = $dbh->prepare($querryallpaysase);
+        $datastatement->execute(["id"=>$_GET['selectorcontinent']]);
+        $datamultiple = $datastatement->fetchAll();
+    } else if (isset($_GET['selectorregion']) && !$_GET['selectorregion'] == ''){
+        $datastatement = $dbh->prepare($querryallpays);
+        $datastatement->execute(["id"=>$_GET['selectorregion']]);
         $datamultiple = $datastatement->fetchAll();
     }
+
+}
+
 
 ?>
 
@@ -38,32 +55,34 @@
 <body>
     <header class="container">
         <div class="row menu">
-            <h1 class="text-center">Population Mondiale 2019</h1>
-            <form action="/" method="get" class="row menu d-flex align-items-end justify-content-center mb-5">
-                <div class='form-group formulaire w-25'>
+            <h1 class="text-center mt-5">Population Mondiale 2019</h1>
+            <form action="/" method="get" class="row menu d-flex align-items-end justify-content-center mb-5 form-dark">
+                <div class='form-group formulaire w-25 '>
                     <label for="selectorcontinent">Par continent</label>
-                    <select class="form-control" id="selectorcontinent" name="selectorcontinent" onchange="this.form.submit()">
+                    <select class="form-control bg-dark text-white" id="selectorcontinent" name="selectorcontinent" onchange="this.form.submit()">
                         <option value="">Monde</option>
                         <?php foreach ($affselectcont as $cont) : ?>
-                            <?php if($cont['ContID'] == $idContinent) : ?>
-                                
+                            <?php if ($cont['ContID'] == $_GET['selectorcontinent']) : ?>
                                 <?= "<option selected value=" . $cont['ContID'] . ">" .  $cont['ContName'] . "</option>" ?>
                             <?php else : ?>
                                 <?= "<option value=" . $cont['ContID'] . ">" .  $cont['ContName'] . "</option>" ?>
-                                <?php endif; ?>
-                            
+                            <?php endif; ?>
                         <?php endforeach ?>
                     </select>
                 </div>
                 <div class='form-group formulaire w-25'>
                     <label for="selectorregion">Par region</label>
-                    <select class="form-control" id="selectorregion" name="selectorregion" onchange="changeRegion();">
-                        <!-- <?php foreach ($affselectreg as $reg) : ?>
-                            <?= "<option value=" . $reg['RegID'] . ">" .  $reg['RegName'] . "</option>" ?>
-                        <?php endforeach ?> -->
+                    <select class="form-control bg-dark text-white" id="selectorregion" name="selectorregion" onchange="this.form.submit()">
+                    <option value="">Aucun</option>
+                        <?php foreach ($affselectreg as $reg) : ?>
+                                <?php if ($reg['RegID'] == $_GET['selectorregion']) : ?>
+                                    <?= "<option selected value=" . $reg['RegID'] . ">" .  $reg['RegName'] . "</option>" ?>
+                                <?php else : ?>
+                                    <?= "<option value=" . $reg['RegID'] . ">" .  $reg['RegName'] . "</option>" ?>
+                                <?php endif; ?>
+                        <?php endforeach ?>
                     </select>
                 </div>
-                <button class="btn btn-dark w-25 h-75" type="submit">Afficher</button>
             </form>
 
         </div>
@@ -71,8 +90,8 @@
     </header>
     <main>
         <div class="container data">
-            <table class="table table-bordered">
-                <thead>
+            <table class="table table-bordered table-striped table-dark">
+                <thead class="thead-dark">
                     <tr>
                         <th scope="col">Pays</th>
                         <th scope="col">Population totale <span class="info">(en milliers)</span></th>
@@ -88,7 +107,7 @@
                 <tbody>
                     <?php foreach ($datamultiple as $data) : ?>
                         <tr>
-                            <td><?= $data['Continent'] ?></td>
+                            <td><?= $data['Nom'] ?></td>
                             <td><?= $data['PopulationTotale'] ?></td>
                             <td><?= round($data['TauxNatalite'], 1) ?></td>
                             <td><?= round($data['TauxMortalite'], 1) ?></td>

@@ -1,16 +1,21 @@
 <?php
 
 // Affichage des continent
-$querryallcontinent = 'SELECT t_continents.id_continent AS ContID, 
+$querrydisplaycontinent = 'SELECT t_continents.id_continent AS ContID, 
 t_continents.libelle_continent AS ContName 
 FROM t_continents;';
 
 // Affichage des regions
-$querryallregion = '';
+$querrydisplayregion = 'SELECT t_regions.id_region AS RegID,
+t_regions.libelle_region AS RegName
+FROM t_regions
+INNER JOIN t_continents ON (t_continents.id_continent = t_regions.continent_id)
+WHERE t_continents.id_continent = :id
+GROUP BY t_regions.id_region;';
 
 // CONTINENTS
 // Tout les continent 
-$querrypercontinent = 'SELECT t_continents.libelle_continent AS Continent, 
+$querrypercontinent = 'SELECT t_continents.libelle_continent AS Nom, 
 SUM(t_pays.population_pays) AS PopulationTotale, 
 AVG(t_pays.taux_natalite_pays) AS TauxNatalite, 
 AVG(t_pays.taux_mortalite_pays) AS TauxMortalite, 
@@ -35,7 +40,7 @@ SUM(t_pays.population_plus_65_pays) AS Population65Plus
 FROM t_pays';
 
 // REGIONS
-$querryallregion = 'SELECT t_regions.libelle_region AS Region, 
+$querryallregion = 'SELECT t_regions.libelle_region AS Nom, 
 SUM(t_pays.population_pays) AS PopulationTotale, 
 AVG(t_pays.taux_natalite_pays) AS TauxNatalite, 
 AVG(t_pays.taux_mortalite_pays) AS TauxMortalite, 
@@ -52,8 +57,7 @@ GROUP BY t_regions.id_region;';
 
 
 // PAYS
-// Les pays de l'Afrique Centrale
-$querryallpays = 'SELECT t_pays.libelle_pays AS Pays, 
+$querryallpays = 'SELECT t_pays.libelle_pays AS Nom, 
 SUM(t_pays.population_pays) AS PopulationTotale, 
 AVG(t_pays.taux_natalite_pays) AS TauxNatalite, 
 AVG(t_pays.taux_mortalite_pays) AS TauxMortalite, 
@@ -68,7 +72,7 @@ WHERE t_regions.id_region = :id
 GROUP BY t_pays.id_pays;';
 
 // Les pays de l'Amérique Septentrionale
-$querryallpaysase = 'SELECT t_pays.libelle_pays AS Pays, 
+$querryallpaysase = 'SELECT t_pays.libelle_pays AS Nom, 
 SUM(t_pays.population_pays) AS PopulationTotale, 
 AVG(t_pays.taux_natalite_pays) AS TauxNatalite, 
 AVG(t_pays.taux_mortalite_pays) AS TauxMortalite, 
@@ -79,5 +83,5 @@ AVG(t_pays.taux_croissance_pays) AS TauxCroissance,
 SUM(t_pays.population_plus_65_pays) AS Population65Plus 
 FROM t_pays 
 INNER JOIN t_continents ON (t_continents.id_continent = t_pays.continent_id)
-WHERE t_continents.libelle_continent = "Amérique Septentrionale"
+WHERE t_continents.id_continent = :id
 GROUP BY t_pays.id_pays;';

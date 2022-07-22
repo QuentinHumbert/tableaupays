@@ -4,7 +4,17 @@
     box-sizing: border-box;
 }
 
+body{
+    background: url('/assets/images/world.jpg');
+    background-size: cover;
+    color: white;
+}
+
 main{
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.info{
+    font-weight: normal;
 }
 
